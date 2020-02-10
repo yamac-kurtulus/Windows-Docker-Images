@@ -1,0 +1,25 @@
+#### Build container
+FROM mcr.microsoft.com/windows/servercore:ltsc2019 as installer
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+WORKDIR C:\\nexus
+COPY nexus.zip nexus.zip
+RUN Expand-Archive 'nexus.zip' -DestinationPath 'C:\\nexus'
+RUN Remove-Item -Path 'C:\\nexus\\*.zip' -Filter '*.zip' -Force
+RUN Get-ChildItem -Path 'C:\\nexus' -Filter 'nexus-*' -Directory | Rename-Item -NewName 'nexus_root' -Force
+COPY nexus.vmoptions /nexus/nexus_root/bin
+
+#### Runtime Container
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
+
+EXPOSE 8081
+EXPOSE 8082
+WORKDIR C:\\nexus
+
+COPY --from=installer C:\\nexus .
+COPY ./runNexus.ps1 ./runNexus.ps1
+ENTRYPOINT ./runNexus.ps1 
+
+RUN MKDIR c:\\data
+RUN Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\DOS Devices' -Name 'G:' -Value "\??\\C:\\data" -Type String
