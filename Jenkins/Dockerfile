@@ -11,18 +11,19 @@ RUN powershell -Command $ErrorActionPreference = 'Stop' ; \
     Remove-Item mingit.zip -Force ; \
     setx /M PATH $('c:\mingit\cmd;{0}' -f $env:PATH)
 
-#INSTALLING IIS
-RUN Powershell.exe -Command Install-WindowsFeature Web-Server
+#Install service monitor to use as an entrypoint
 RUN Powershell.exe -Command Invoke-WebRequest -UseBasicParsing -Uri "https://dotnetbinaries.blob.core.windows.net/servicemonitor/2.0.1.6/ServiceMonitor.exe" -OutFile "C:\ServiceMonitor.exe"
-
-#Install jenkins
+#Install Jenkins
 RUN Powershell.exe -Command Invoke-WebRequest -UseBasicParsing -Uri  http://mirrors.jenkins-ci.org/windows-stable/latest -OutFile "C:/jenkins.zip"
 RUN Powershell.exe -Command Expand-Archive C:/jenkins.zip C:/Jenkins
 
-#INSTALLING JENKINS
-RUN ["msiexec.exe", "/i", "C:\\jenkins\\jenkins.msi", "/qn"]
+RUN Powershell.exe -Command msiexec.exe /i C:/Jenkins/Jenkins.msi /qn
  
 #REMOVING SETUP FILES FROM CONTAINER
 RUN Powershell.exe -Command remove-item c:/jenkins –Recurse
+EXPOSE 8080
+EXPOSE 8081
 
+#INSTALLING IIS
+RUN Powershell.exe -Command Install-WindowsFeature Web-Server
 ENTRYPOINT ["C:\\ServiceMonitor.exe", "w3svc"]
