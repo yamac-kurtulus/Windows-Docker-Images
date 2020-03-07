@@ -2,7 +2,7 @@
 
 ARG windowsVersion='1809'
 FROM mcr.microsoft.com/windows/servercore:$windowsVersion as download
-ENV CONSUL_VERSION 1.6.3
+ARG CONSUL_VERSION='1.7.1'
 
 RUN powershell -Command $ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'; `
     Invoke-WebRequest $('https://releases.hashicorp.com/consul/{0}/consul_{0}_windows_amd64.zip' -f $env:CONSUL_VERSION) -OutFile 'consul.zip' -UseBasicParsing ; `
@@ -12,8 +12,9 @@ RUN powershell -Command $ErrorActionPreference = 'Stop'; $ProgressPreference = '
     mkdir C:\download\consul\config
 
 FROM mcr.microsoft.com/windows/nanoserver:$windowsVersion
-COPY --from=download /download /
-
+COPY --from=download /download / 
+#Consul requires the following dll for golang libraries, use this as a workaround for now
+COPY --from=download /windows/system32/netapi32.dll /windows/system32/netapi32.dll 
 # Expose the consul data directory as a volume since there's mutable state in there.
 # VOLUME C:\consul\data
 
