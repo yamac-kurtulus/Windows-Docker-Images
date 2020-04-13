@@ -18,7 +18,7 @@ RUN .\archiver.exe open prometheus.tar.gz
 RUN Rename-Item -Path $('C:\prometheus-{0}.windows-amd64' -f $env:PROMETHEUS_VERSION) -NewName 'C:\download'
 
 FROM mcr.microsoft.com/windows/nanoserver:$tag
-
+COPY --from=tar C:\Windows\System32\netapi32.dll  C:\Windows\System32\netapi32.dll
 COPY --from=tar /download/prometheus.exe      /bin/prometheus.exe
 COPY --from=tar /download/promtool.exe        /bin/promtool.exe
 COPY --from=tar /download/prometheus.yml      /etc/prometheus/prometheus.yml
