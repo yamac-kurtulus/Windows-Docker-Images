@@ -1,14 +1,17 @@
 # escape=`
-ARG winVersion="1809"
-FROM mcr.microsoft.com/windows/servercore:$winVersion as build
-ARG GrafanaVersion="6.6.2"
-SHELL ["powershell", "-command"]
+ARG windowsVersion=1809
+FROM mcr.microsoft.com/windows/servercore:$windowsVersion AS tar
+ARG grafanaVersion="6.7.2"
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 WORKDIR C:/
-RUN invoke-webrequest -useb https://dl.grafana.com/oss/release/grafana-${GrafanaVersion}.windows-amd64.zip
-RUN expand-archive C:/
-RUN rename grafana-${GrafanaVersion} grafana
-FROM mcr.microsoft.com/windows/nanoserver:$winVersion as final
+RUN iwr "https://dl.grafana.com/oss/release/grafana-${Env:grafanaVersion}.windows-amd64.zip" -o grafana.zip
+RUN Expand-archive grafana.zip ./grafana
+
+FROM mcr.microsoft.com/windows/nanoserver:$windowsVersion
+ARG grafanaVersion="6.7.2"
+WORKDIR c:/
+COPY --from=tar C:/grafana/grafana-${grafanaVersion} ./grafana
 WORKDIR C:/grafana
 COPY --from=build C:/grafana .
 EXPOSE 3000
-ENTRYPOINT ["./bin/grafana-server.exe"]
+ENTRYPOINT ["C:\\grafana\\bin\\grafana-server.exe"]
