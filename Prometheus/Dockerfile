@@ -18,18 +18,17 @@ RUN .\archiver.exe open prometheus.tar.gz
 RUN Rename-Item -Path $('C:\prometheus-{0}.windows-amd64' -f $env:PROMETHEUS_VERSION) -NewName 'C:\download'
 
 FROM mcr.microsoft.com/windows/nanoserver:$tag
+WORKDIR C:/prometheus
 COPY --from=tar C:\Windows\System32\netapi32.dll  C:\Windows\System32\netapi32.dll
-COPY --from=tar /download/prometheus.exe      /bin/prometheus.exe
-COPY --from=tar /download/promtool.exe        /bin/promtool.exe
-COPY --from=tar /download/prometheus.yml      /etc/prometheus/prometheus.yml
-COPY --from=tar /download/console_libraries/  /etc/prometheus/
-COPY --from=tar /download/consoles/           /etc/prometheus/
+COPY --from=tar /download/prometheus.exe      bin/prometheus.exe
+COPY --from=tar /download/promtool.exe        bin/promtool.exe
+COPY --from=tar /download/prometheus.yml      conf/prometheus.yml
+COPY --from=tar /download/console_libraries/  console_libraries/
+COPY --from=tar /download/consoles/           consoles/
 
 EXPOSE     9090
-# VOLUME     C:\prometheus
-# WORKDIR    C:\prometheus
-ENTRYPOINT [ "C:\\bin\\prometheus.exe" ]
-CMD        [ "--config.file=/etc/prometheus/prometheus.yml", `
-             "--storage.tsdb.path=/prometheus", `
-             "--web.console.libraries=/etc/prometheus/console_libraries", `
-             "--web.console.templates=/etc/prometheus/consoles" ]
+ENTRYPOINT [ "/prometheus/bin/prometheus.exe" ]
+CMD        [ "--config.file=/prometheus/conf/prometheus.yml", `
+             "--storage.tsdb.path=/prometheus/data", `
+             "--web.console.libraries=/prometheus/console_libraries", `
+             "--web.console.templates=/prometheus/consoles" ]
