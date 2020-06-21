@@ -1,5 +1,5 @@
 #escape=`
-FROM mcr.microsoft.com/windows/servercore:1803 AS sdk
+FROM mcr.microsoft.com/windows/servercore:1809 AS sdk
 ARG dotnetCoreVersion=2.1
 ARG chromeVersion=83
 SHELL ["powershell", "-command", "$ErrorActionPreference = 'Stop';"]
