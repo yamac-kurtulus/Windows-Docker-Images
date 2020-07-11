@@ -26,7 +26,6 @@ RUN Start-Process -Wait -FilePath "c:\erlang_install.exe" -ArgumentList /S, /D=$
 RUN Invoke-WebRequest -usebasicparsing -Uri "https://github.com/rabbitmq/rabbitmq-server/releases/download/v$env:RABBITMQ_VERSION/rabbitmq-server-$env:RABBITMQ_VERSION.exe" -OutFile "c:\rabbitmq.exe" ;
 # Copy config and sample before creating the service
 COPY ./rabbitmq.conf.sample ${RABBITMQ_CONFIG_FILE}.conf.sample
-COPY ./rabbitmq.conf C:/rabbitmq/conf/rabbitmq.conf
 RUN "$proc = Start-Process 'c:\rabbitmq.exe' '/S' -Wait:$false -Passthru;"`
     Wait-Process -Id "$proc.Id"
 RUN Remove-Item -Force -Path "c:\rabbitmq.exe" ;
@@ -36,6 +35,6 @@ RUN "setx /M PATH $($Env:PATH+';C:\Program Files\RabbitMQ Server\rabbitmq_server
 RUN rabbitmq-service remove
 EXPOSE 4369 5671 5672 25672 15672
 # enable managment plugin
-RUN rabbitmq-plugins enable --offline rabbitmq_management 
+RUN rabbitmq-plugins enable --offline rabbitmq_management
 # run server when container starts - container will shutdown when this process ends
 ENTRYPOINT rabbitmq-server.bat 
