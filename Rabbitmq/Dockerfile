@@ -36,5 +36,6 @@ RUN rabbitmq-service remove
 EXPOSE 4369 5671 5672 25672 15672
 # enable managment plugin
 RUN rabbitmq-plugins enable --offline rabbitmq_management
+RUN rabbitmq-plugins enable --offline rabbitmq_prometheus
 # run server when container starts - container will shutdown when this process ends
 ENTRYPOINT rabbitmq-server.bat 

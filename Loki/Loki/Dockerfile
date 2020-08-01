@@ -1,7 +1,8 @@
 # escape=`
 ARG windowsVersion=1809
-FROM mcr.microsoft.com/windows/servercore:$windowsVersion AS tar
 ARG lokiVersion=1.5.0
+FROM mcr.microsoft.com/windows/servercore:$windowsVersion AS tar
+ARG lokiVersion
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 WORKDIR C:/
 RUN iwr https://github.com/grafana/loki/releases/download/v${Env:lokiVersion}/loki-windows-amd64.exe.zip -o ./loki.zip

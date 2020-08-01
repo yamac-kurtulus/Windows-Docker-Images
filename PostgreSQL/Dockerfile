@@ -1,7 +1,7 @@
 ####
 #### argument for Windows version must be set early
 ####
-ARG WIN_VER
+ARG WIN_VER=1809
 
 ####
 #### Download and prepare PostgreSQL for Windows
@@ -9,15 +9,18 @@ ARG WIN_VER
 FROM mcr.microsoft.com/windows/servercore:${WIN_VER} as prepare
 
 ### Set the variables for EnterpriseDB
-ARG EDB_VER
+ARG EDB_VER=pg12
 ENV EDB_VER $EDB_VER
-ENV EDB_REPO https://get.enterprisedb.com/postgresql
+ENV EDB_REPO https://sbp.enterprisedb.com/getfile.jsp?fileid=12540
 
 ##### Use PowerShell for the installation
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
+##### Required to make deletions in C
+USER ContainerAdministrator
+
 ### Download EnterpriseDB and remove cruft
-RUN $URL1 = $('{0}/postgresql-{1}-windows-x64-binaries.zip' -f $env:EDB_REPO,$env:EDB_VER) ; \
+RUN $URL1=$Env:EDB_REPO ; \
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 ; \
     Invoke-WebRequest -Uri $URL1 -OutFile 'C:\\EnterpriseDB.zip' ; \
     Expand-Archive 'C:\\EnterpriseDB.zip' -DestinationPath 'C:\\' ; \
@@ -67,8 +70,6 @@ RUN if (Test-Path 'C:\\windows\\system32\\msvcp120.dll') { \
 ####
 FROM mcr.microsoft.com/windows/nanoserver:${WIN_VER}
 
-RUN mkdir "C:\\docker-entrypoint-initdb.d"
-
 #### Copy over PostgreSQL
 COPY --from=prepare /pgsql /pgsql
 
@@ -76,10 +77,9 @@ COPY --from=prepare /pgsql /pgsql
 USER ContainerAdministrator
 RUN setx /M PATH "C:\\pgsql\\bin;%PATH%"
 USER ContainerUser
+COPY ./docker-entrypoint.cmd .
 ENV PGDATA "C:\\pgsql\\data"
-
-COPY docker-entrypoint.cmd /
-ENTRYPOINT ["C:\\docker-entrypoint.cmd"]
+ENTRYPOINT docker-entrypoint.cmd
 
 EXPOSE 5432
-CMD ["postgres"]
+CMD postgres
