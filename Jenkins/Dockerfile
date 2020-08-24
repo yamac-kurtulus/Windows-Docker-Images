@@ -1,8 +1,11 @@
 #SPECIFY THE CONTAINER IMAGE
-FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
-ENV GIT_VERSION 2.25.0
-ENV GIT_PATCH_VERSION 1
+ARG GIT_VERSION=2.25.0
+ARG GIT_PATCH_VERSION=1
+
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+ARG GIT_VERSION
+ARG GIT_PATCH_VERSION
 
 RUN powershell -Command $ErrorActionPreference = 'Stop' ; \
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 ; \
