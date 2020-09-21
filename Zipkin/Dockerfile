@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/windows/servercore:1809 as download
-ARG zipkinVersion="2.19.3"
+ARG zipkinVersion="2.21.0"
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"] 
 WORKDIR C:/zipkin
 RUN iwr "https://search.maven.org/remotecontent?filepath=io/zipkin/zipkin-server/${env:zipkinVersion}/zipkin-server-${env:zipkinVersion}-exec.jar" -useb -o zipkin.jar

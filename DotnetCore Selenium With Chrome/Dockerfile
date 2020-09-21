@@ -23,8 +23,8 @@ RUN iex(iwr -useb https://chocolatey.org/install.ps1)
 #We need these totally standard fonts manually added for some reason....
 COPY Fonts /Fonts
 RUN C:\Fonts\Add-Font.ps1 C:\Fonts\Fonts
-RUN choco install googlechrome  -fy
-RUN $chromeVersion3Part = [RegEx]::Match((Get-Item 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe').VersionInfo.FileVersion, '[0-9]{1,8}\.[0-9]{1,8}\.[0-9]{1,8}').Value;`
+RUN choco install googlechrome  -fy --verbose
+RUN $chromeVersion3Part = [RegEx]::Match((Get-Item 'C:/Program Files/Google/Chrome/Application/chrome.exe').VersionInfo.FileVersion, '[0-9]{1,8}\.[0-9]{1,8}\.[0-9]{1,8}').Value;`
     $chromeDriverVersionUrl = 'https://chromedriver.storage.googleapis.com/LATEST_RELEASE_' + $chromeVersion3Part; `
     $chromeDriverVersion=(Invoke-WebRequest -UseBasicParsing $chromeDriverVersionUrl).Content;`
     New-Item -Type Directory 'C:/Selenium';`
